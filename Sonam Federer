@@ -1,0 +1,87 @@
+🧱 Auftrag 4 – Redmine mit Docker Compose & versteckten Passwörtern
+🎯 Ziel:
+Redmine läuft mit Datenbank, Passwörter sind in .env versteckt, Start erfolgt über docker compose.
+
+🧱 Projektstruktur:
+arduino
+Kopieren
+Bearbeiten
+redmine-projekt/
+├── .env
+├── docker-compose.yml
+└── .gitignore (optional)
+
+🛠️ Schritt-für-Schritt-Anleitung:
+✅ 1. Verzeichnis anlegen
+
+mkdir redmine-projekt
+cd redmine-projekt
+
+✅ 2. .env-Datei erstellen
+
+nano .env
+Inhalt einfügen:
+
+MYSQL_ROOT_PASSWORD=rootpass
+REDMINE_DB_PASSWORD=redminepass
+REDMINE_PASSWORD=adminpass
+
+✅ 3. docker-compose.yml erstellen
+
+nano docker-compose.yml
+Inhalt:
+
+yaml
+Kopieren
+Bearbeiten
+version: '3'
+
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: redmine
+      MYSQL_USER: redmine
+      MYSQL_PASSWORD: ${REDMINE_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redmine:
+    image: redmine:5
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD}
+      REDMINE_PASSWORD: ${REDMINE_PASSWORD}
+    depends_on:
+      - db
+    volumes:
+      - redmine_data:/usr/src/redmine/files
+
+volumes:
+  db_data:
+  redmine_data:
+
+✅ 4. Docker Compose starten
+
+docker compose up -d
+(Das lädt Redmine & MariaDB und startet beides.)
+
+✅ 5. Im Browser öffnen
+
+http://localhost:3000
+Login:
+
+Benutzer: admin
+
+Passwort: admin → du musst ein neues setzen
+
+✅ .gitignore (optional, empfohlen)
+
+echo ".env" > .gitignore
+Damit du .env nicht versehentlich mit Git hochlädst.
+
