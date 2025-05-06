@@ -1,0 +1,96 @@
+🎯 Ziel:
+Ein Container mit Apache2, der über HTTP (Port 8080) und HTTPS (Port 8443) erreichbar ist – mit selbstsigniertem Zertifikat.
+
+🧱 Projektstruktur:
+pgsql
+Kopieren
+Bearbeiten
+apache-projekt/
+├── Dockerfile
+├── index.html
+├── apache/
+│   └── httpd.conf
+└── ssl/
+    ├── server.crt
+    └── server.key
+🛠️ Schritt-für-Schritt-Anleitung:
+✅ 1. Verzeichnis anlegen
+bash
+Kopieren
+Bearbeiten
+mkdir -p apache-projekt/apache
+mkdir apache-projekt/ssl
+cd apache-projekt
+✅ 2. Beispiel-Webseite erstellen
+bash
+Kopieren
+Bearbeiten
+echo "<h1>Hallo vom Apache-Docker-Container!</h1>" > index.html
+✅ 3. Apache-Konfig erstellen
+bash
+Kopieren
+Bearbeiten
+nano apache/httpd.conf
+Inhalt einfügen:
+
+apache
+Kopieren
+Bearbeiten
+ServerRoot "/usr/local/apache2"
+Listen 80
+Listen 443
+
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+
+ServerName localhost
+
+<VirtualHost *:80>
+    DocumentRoot "/usr/local/apache2/htdocs"
+</VirtualHost>
+
+<VirtualHost *:443>
+    DocumentRoot "/usr/local/apache2/htdocs"
+    SSLEngine on
+    SSLCertificateFile "/usr/local/apache2/conf/ssl/server.crt"
+    SSLCertificateKeyFile "/usr/local/apache2/conf/ssl/server.key"
+</VirtualHost>
+✅ 4. SSL-Zertifikat erstellen
+bash
+Kopieren
+Bearbeiten
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+-keyout ssl/server.key -out ssl/server.crt \
+-subj "/C=CH/ST=ZH/L=Zürich/O=Schule/OU=IT/CN=localhost"
+✅ 5. Dockerfile erstellen
+bash
+Kopieren
+Bearbeiten
+nano Dockerfile
+Inhalt einfügen:
+
+Dockerfile
+Kopieren
+Bearbeiten
+FROM httpd:2.4
+
+COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
+COPY ssl/ /usr/local/apache2/conf/ssl/
+COPY index.html /usr/local/apache2/htdocs/
+
+EXPOSE 80 443
+✅ 6. Docker-Image bauen
+bash
+Kopieren
+Bearbeiten
+docker build -t apacheprojekt .
+✅ 7. Container starten (auf Port 8080/8443)
+bash
+Kopieren
+Bearbeiten
+docker run -d -p 8080:80 -p 8443:443 --name apacheprojekt apacheprojekt
+✅ 8. Im Browser aufrufen
+http://localhost:8080
+
+https://localhost:8443 (Warnung → „Erweitert“ → „trotzdem fortfahren“)
+
