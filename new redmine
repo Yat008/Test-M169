@@ -1,0 +1,94 @@
+✅ Aufgabe 4a: Redmine mit docker-compose + Secrets (schulkonform)
+📁 Projektstruktur:
+markdown
+Kopieren
+Bearbeiten
+redmine-projekt/
+├── docker-compose.yml
+└── secrets/
+    ├── db_password.txt
+    └── db_root_password.txt
+🧱 1. Verzeichnis erstellen:
+bash
+Kopieren
+Bearbeiten
+mkdir -p redmine-projekt/secrets
+cd redmine-projekt
+📝 2. Secrets-Dateien erstellen:
+bash
+Kopieren
+Bearbeiten
+echo "redminepass" > secrets/db_password.txt
+echo "rootpass" > secrets/db_root_password.txt
+📝 3. docker-compose.yml erstellen:
+bash
+Kopieren
+Bearbeiten
+nano docker-compose.yml
+🔽 Inhalt einfügen:
+
+yaml
+Kopieren
+Bearbeiten
+version: "3.8"
+
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_DATABASE: redmine
+      MYSQL_USER: redmine
+    secrets:
+      - db_root_password
+      - db_password
+
+  redmine:
+    image: redmine:5
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_PASSWORD: redminepass
+    depends_on:
+      - db
+
+secrets:
+  db_root_password:
+    file: secrets/db_root_password.txt
+  db_password:
+    file: secrets/db_password.txt
+▶️ 4. Compose starten:
+bash
+Kopieren
+Bearbeiten
+docker-compose up -d
+🌐 5. Redmine im Browser öffnen:
+arduino
+Kopieren
+Bearbeiten
+http://localhost:3000
+Benutzer: admin
+
+Passwort: admin (wird beim ersten Login geändert)
+
+Du kannst alles direkt in die Konsole kopieren und einsetzen.
+Wenn du willst, mache ich dir daraus auch eine ZIP-Datei oder ein Installationsskript. Sag einfach Bescheid.
+
+
+
+
+
+
+
+Du:
+die html file hat man schon bei der aufgabe 3 geh mal davon aus das sie unter dokumente liegt
+
+
+ChatGPT:
+Perfekt, danke für die Info! Wenn du die index.html für Aufgabe 3 bereits hast und sie im Ordner ~/Dokumente/index.html (also in deinem Benutzerordner unter Dokumente) liegt, dann musst du sie nicht mehr neu schreiben, sondern einfach kopieren oder referenzieren.
+
+Hier ist jetzt die angepasste Version von Aufgabe 3, die deine vorhandene HTML-Datei aus dem Dokumente-Ordner nutzt:
