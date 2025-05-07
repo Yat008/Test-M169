@@ -1,0 +1,66 @@
+✅ Aufgabe 3: Apache2 mit SSL (Dockerfile) – HTML liegt bereits unter ~/Dokumente
+📁 Struktur, wie du sie brauchst:
+pgsql
+Kopieren
+Bearbeiten
+apache-projekt/
+├── Dockerfile
+├── samplesite/
+│   └── index.html  ← wird von Dokumente kopiert
+🛠️ Schritt-für-Schritt
+📂 1. Verzeichnisstruktur vorbereiten
+bash
+Kopieren
+Bearbeiten
+mkdir -p apache-projekt/samplesite
+cd apache-projekt
+📄 2. HTML-Datei von Dokumente kopieren
+bash
+Kopieren
+Bearbeiten
+cp ~/Dokumente/index.html samplesite/
+📝 3. Dockerfile erstellen
+bash
+
+nano Dockerfile
+🔽 Inhalt einfügen:
+
+Dockerfile
+Kopieren
+Bearbeiten
+FROM ubuntu:20.04
+
+LABEL maintainer="dein.name@schule.ch"
+LABEL description="Apache Webprojekt mit SSL"
+
+ENV TZ="Europe/Berlin" \
+    APACHE_RUN_USER=www-data \
+    APACHE_RUN_GROUP=www-data \
+    APACHE_LOG_DIR=/var/log/apache2 \
+    LANG=C.UTF-8
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    apt-get update && \
+    apt-get install -y apache2 curl nano iputils-ping && \
+    apt-get -y clean && rm -r /var/cache/apt /var/lib/apt/lists/* && \
+    a2ensite default-ssl && a2enmod ssl rewrite headers
+
+COPY samplesite/ /var/www/html
+
+EXPOSE 80 443
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+⚙️ 4. Image bauen
+bash
+Kopieren
+Bearbeiten
+docker build -t apacheprojekt .
+▶️ 5. Container starten
+bash
+Kopieren
+Bearbeiten
+docker run -d -p 8080:80 -p 8443:443 --name apacheprojekt apacheprojekt
+🌐 6. Webseite im Browser aufrufen
+http://localhost:8080
+
+https://localhost:8443 (Warnung akzeptieren)
